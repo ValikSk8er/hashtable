@@ -19,15 +19,25 @@ namespace ConsoleApp1
                 }
                 var hash = hashTable.GetHash(key);
                 Console.WriteLine($"hash: {hash}");
-                Console.WriteLine($"index: {hashTable.GetIndex(hash)}");
-                Console.WriteLine(new string('-', 16));
-
+                Console.WriteLine($"index: {hashTable.GetIndex(key)}");
+                PrintLine();
                 hashTable.Add(key, hash);
-                hashTable.ShowLoadFactor();
+                
                 hashTable.ShowHashTable();
-                Console.WriteLine(new string('-', 16));
+                PrintLine();
+                
+                Console.WriteLine($"Get value by key '{key}': {hashTable.GetValue(key)}");
+                hashTable.ShowLoadFactor();
+                PrintLine();
+
+
             }
             
+        }
+
+        private static void PrintLine()
+        {
+            Console.WriteLine(new string('-', 16));
         }
     }
 }

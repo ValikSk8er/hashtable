@@ -15,7 +15,8 @@
         private LinkedList<Bucket>[] _hashTable;
         private int _size = 8;
         private int _capacity = 0;
-        public const float LoadFactorValue = 0.72F;
+        public const float LoadFactor = 0.72F;
+        
 
         public VHashTable()
         {
@@ -25,18 +26,17 @@
         //public void Add(TKey key, TValue value)
         public void Add(object key, object value)
         {
-            double _loadFactor = (float)_capacity / _size;
+            float _currentLoadFactor = (float)_capacity / _size;
 
-            if (key == null)
+            if ((string)key == string.Empty)
             {
                 throw new NullReferenceException("key is absent");
             }
 
-            //if(_loadFactor > LoadFactorValue)
-            //{
-            //    _size = _size + 2;
-            //    CreateBigestHashTable();                
-            //}
+            if (_currentLoadFactor > LoadFactor)
+            {
+                CreateBigestHashTable();
+            }
 
             var hash = GetHash(key);
             var index = GetIndex(hash);
@@ -53,22 +53,21 @@
 
         public object GetValue(object key)
         {
-            throw new NotImplementedException();
+            var currentIndex = GetIndex(key);
+
+            if(_hashTable[currentIndex] != null)
+            {
+                return GetBucketValue(_hashTable[currentIndex], key);
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        private bool ContainsKey(LinkedList<Bucket> bucketsList, object key)
+        public int GetIndex(object key)
         {
-            return bucketsList.FirstOrDefault(_ => _.key.Equals(key)).key != null;
-        }
-
-        private void CreateBigestHashTable()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int GetIndex(int hash)
-        {
-            return hash % _size;
+            return GetHash(key) % _size;
         }
 
         public int GetHash(object key)
@@ -91,7 +90,6 @@
                     {
                         Console.WriteLine($"key: {element.key}, value: {element.value}");
                     }
-                    Console.WriteLine();
                 }                
             }
         }
@@ -99,6 +97,51 @@
         public void ShowLoadFactor()
         {
             Console.WriteLine($"Load factor is: {(float)_capacity / _size}");
+            Console.WriteLine($"Capacity is: {_capacity}");
+        }
+
+        private bool ContainsKey(LinkedList<Bucket> bucketsList, object key)
+        {
+            return GetBucketValue(bucketsList, key) != null;
+        }
+
+        private object GetBucketValue(LinkedList<Bucket> bucketsList, object key)
+        {
+            return bucketsList.FirstOrDefault(_ => _.key.Equals(key)).value;
+        }
+
+        private void CreateBigestHashTable()
+        {
+            do
+            {
+                _size = (int)(_size + _size * LoadFactor);
+            }
+            while (_capacity / _size > LoadFactor);
+            
+            var biggestHashTable = new LinkedList<Bucket>[_size];
+
+            foreach(var buckets in _hashTable)
+            {
+                if (buckets != null)
+                {
+                    foreach(var bucket in buckets)
+                    {
+                        var key = bucket.key;
+                        var value = bucket.value;
+                        var index = GetIndex(key);
+
+                        if (biggestHashTable[index] == null)
+                        {
+                            biggestHashTable[index] = new LinkedList<Bucket>();
+                        }
+                        if (!ContainsKey(biggestHashTable[index], key))
+                        {
+                            biggestHashTable[index].AddFirst(new Bucket { key = key, value = value });
+                        }
+                    }
+                }                
+            }
+            _hashTable = biggestHashTable;
         }
     }
 }
