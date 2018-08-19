@@ -7,32 +7,37 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            var hashTable = new VHashTable();
+            var hashTable = new VHashTable<int, string>();
 
             while (true)
             {
                 Console.Write("enter a key: ");
-                var key = Console.ReadLine();
-                if(key == "q")
+                var key = int.Parse(Console.ReadLine());
+
+                if (key == -1)
                 {
                     break;
                 }
-                var hash = hashTable.GetHash(key);
-                Console.WriteLine($"hash: {hash}");
-                Console.WriteLine($"index: {hashTable.GetIndex(key)}");
-                PrintLine();
-                hashTable.Add(key, hash);
-                
-                hashTable.ShowHashTable();
-                PrintLine();
-                
-                Console.WriteLine($"Get value by key '{key}': {hashTable.GetValue(key)}");
-                hashTable.ShowCharacteristics();
-                PrintLine();
 
+                Console.Write("enter a value: ");
+                var value = Console.ReadLine();
 
+                hashTable.Add(key, value);
             }
-            
+            PrintLine();
+            hashTable.ShowHashTable();
+            PrintLine();
+            while (true)
+            {
+                Console.Write("Get value by key: ");
+                var key = int.Parse(Console.ReadLine());
+                if (key == -1)
+                {
+                    break;
+                }
+                Console.WriteLine($"{hashTable.GetValueByKey(key)}");
+            }
+            Console.ReadLine();
         }
 
         private static void PrintLine()
