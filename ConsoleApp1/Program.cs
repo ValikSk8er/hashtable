@@ -27,7 +27,7 @@ namespace ConsoleApp1
                 PrintLine();
                 
                 Console.WriteLine($"Get value by key '{key}': {hashTable.GetValue(key)}");
-                hashTable.ShowLoadFactor();
+                hashTable.ShowCharacteristics();
                 PrintLine();
 
 

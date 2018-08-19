@@ -15,7 +15,8 @@
         private LinkedList<Bucket>[] _hashTable;
         private int _size = 8;
         private int _capacity = 0;
-        public const float LoadFactor = 0.72F;
+        private const float LoadFactor = 0.72F;
+        private int _tableSizeChangesCounter = 0;
         
 
         public VHashTable()
@@ -36,6 +37,7 @@
             if (_currentLoadFactor > LoadFactor)
             {
                 CreateBigestHashTable();
+                _tableSizeChangesCounter++;
             }
 
             var hash = GetHash(key);
@@ -94,11 +96,13 @@
             }
         }
 
-        public void ShowLoadFactor()
+        public void ShowCharacteristics()
         {
             Console.WriteLine($"Load factor is: {(float)_capacity / _size}");
             Console.WriteLine($"Capacity is: {_capacity}");
-        }
+            Console.WriteLine($"Size is: {_size}");
+            Console.WriteLine($"Table was changed '{_tableSizeChangesCounter}' times");
+    }
 
         private bool ContainsKey(LinkedList<Bucket> bucketsList, object key)
         {
@@ -114,7 +118,7 @@
         {
             do
             {
-                _size = (int)(_size + _size * LoadFactor);
+                _size = (int)(_size + _size * LoadFactor + _size * Math.Sqrt(_tableSizeChangesCounter));
             }
             while (_capacity / _size > LoadFactor);
             
