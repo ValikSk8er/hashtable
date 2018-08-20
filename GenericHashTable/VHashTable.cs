@@ -19,8 +19,8 @@
 
         private struct Bucket
         {
-            public object key;
-            public object value;
+            public TKey key;
+            public TValue value;
         }
 
         public VHashTable()
@@ -47,48 +47,69 @@
 
             var currentBucket = GetBucketByKey(_hashTable[index], key);
 
-            if (currentBucket.key == null)
+            if (currentBucket.key == null || currentBucket.key.Equals(0))
             {
                 _hashTable[index].AddFirst(new Bucket { key = key, value = value });
                 _capacity++;
             }
             else
             {
-                if (currentBucket.key.Equals(key) && !currentBucket.value.Equals(value))
-                {
-                    RemoveValueByKey(key);
-                    _hashTable[index].AddFirst(new Bucket { key = key, value = value });
-                    _tableSizeChangesCounter++;
-                }
+                throw new ArgumentException($"key '{key}' is exist");
             }
         }
 
         public TValue GetValueByKey(TKey key)
         {
             EmptyKeyVerification(key);
-            var currentIndex = GetIndex(key);
+            var index = GetIndex(key);
 
-            if(_hashTable[currentIndex] != null)
+            if(_hashTable[index] != null)
             {
-                return (TValue)GetBucketByKey(_hashTable[currentIndex], key).value;
+                return GetBucketByKey(_hashTable[index], key).value;
             }
 
             throw new NullReferenceException($"Key '{key}' is absent");
         }
 
+        public void UpdateValueByKey(TKey key, TValue value)
+        {
+            EmptyKeyVerification(key);
+            var index = GetIndex(key);
+            if (_hashTable[index] != null)
+            {
+                var currentBucket = GetBucketByKey(_hashTable[index], key);
+                if (currentBucket.key != null && !currentBucket.value.Equals(value))
+                {
+                    RemoveValueByKey(key);
+                    _hashTable[index].AddFirst(new Bucket { key = key, value = value });
+                    _tableSizeChangesCounter++;
+                }
+                else
+                {
+                    KeyIsNotExistException(key);
+                }
+            }
+            else
+            {
+                KeyIsNotExistException(key);
+            }
+        }
+
         public void RemoveValueByKey(TKey key)
         {
             EmptyKeyVerification(key);
-            var currentIndex = GetIndex(key);
+            var index = GetIndex(key);
 
-            if (_hashTable[currentIndex] != null)
+            if (_hashTable[index] != null)
             {
-                var currentBucket = GetBucketByKey(_hashTable[currentIndex], key);
-                _hashTable[currentIndex].Remove(currentBucket);
+                var currentBucket = GetBucketByKey(_hashTable[index], key);
+                _hashTable[index].Remove(currentBucket);
                 _tableSizeChangesCounter--;
             }
-
-            throw new NullReferenceException($"Key '{key}' is absent");
+            else
+            {
+                KeyIsNotExistException(key);
+            }
         }
 
         public void ShowHashTable()
@@ -96,7 +117,7 @@
             for (int i = 0; i < _size; i++)
             {
                 Console.WriteLine($"Bucket with index[{i}]");
-                if(_hashTable[i] == null)
+                if(_hashTable[i] == null || _hashTable[i].Count == 0)
                 {
                     Console.WriteLine("buket is empty");
                 }
@@ -108,11 +129,11 @@
                     }
                 }                
             }
+            Console.WriteLine(new string('-', 16));
         }
 
-        public int GetHash(TKey key)
+        private int GetHash(TKey key)
         {
-            EmptyKeyVerification(key);
             return Math.Abs(key.GetHashCode());
         }
 
@@ -123,13 +144,18 @@
 
         private static void EmptyKeyVerification(TKey key)
         {
-            if (key.Equals(string.Empty))
+            if (key.Equals(0) || key == null)
             {
                 throw new ArgumentNullException("key is empty");
             }
         }
 
-        private Bucket GetBucketByKey(LinkedList<Bucket> bucketsList, object key)
+        private static void KeyIsNotExistException(TKey key)
+        {
+            throw new NullReferenceException($"Key '{key}' is not exist");
+        }
+
+        private Bucket GetBucketByKey(LinkedList<Bucket> bucketsList, TKey key)
         {
             return bucketsList.FirstOrDefault(_ => _.key.Equals(key));
         }
@@ -143,7 +169,7 @@
         {
             do
             {
-                _size = (int)(_size + (_size * LoadFactor) + (_size * Math.Sqrt(_tableSizeChangesCounter)));
+                _size = (int)(_size + _size * LoadFactor + _size * Math.Sqrt(_tableSizeChangesCounter));
             }
             while (GetCurrentLoadFactor() > LoadFactor);
             
@@ -155,7 +181,7 @@
                 {
                     foreach(var bucket in buckets)
                     {
-                        var key = (TKey)bucket.key;
+                        var key = bucket.key;
                         var value = bucket.value;
                         var index = GetIndex(key);
 
