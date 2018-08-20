@@ -14,7 +14,7 @@ namespace ConsoleApp1
                 Console.Write("enter a key: ");
                 var key = int.Parse(Console.ReadLine());
 
-                if (key == -1)
+                if (key == 0)
                 {
                     break;
                 }
@@ -31,7 +31,7 @@ namespace ConsoleApp1
             {
                 Console.Write("Get value by key: ");
                 var key = int.Parse(Console.ReadLine());
-                if (key == -1)
+                if (key == 0)
                 {
                     break;
                 }
