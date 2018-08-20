@@ -125,7 +125,7 @@
         {
             if (key.Equals(string.Empty))
             {
-                throw new NullReferenceException("key is empty");
+                throw new ArgumentNullException("key is empty");
             }
         }
 
